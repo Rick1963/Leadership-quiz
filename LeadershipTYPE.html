@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>リーダーシップタイプ診断</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; animation: fadeIn 1s ease; }
+    h1 { text-align: center; }
+    .question { margin-bottom: 20px; animation: slideIn 0.5s ease; }
+    .options button { margin: 5px; padding: 10px 20px; }
+    #progress { height: 20px; background: #ccc; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+    #progress-bar { height: 100%; width: 0; background: #4caf50; transition: width 0.5s ease; }
+    .result { text-align: center; animation: fadeIn 1s ease; }
+    .result img { width: 200px; margin-top: 20px; animation: bounce 1s infinite alternate; }
+    .share-btn { margin-top: 20px; padding: 10px; background: #1DA1F2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .story { text-align: left; margin-top: 20px; animation: fadeIn 1s ease; }
+    .story h3 { margin-top: 10px; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>リーダーシップタイプ診断</h1>
+  <div id="progress"><div id="progress-bar"></div></div>
+  <div id="quiz"></div>
+  <div id="result" class="result" style="display:none;"></div>
+</div>
+
+<script>
+const questions = [
+  { text: "社員の悩みや相談には耳を傾けている", type: "サーバント" },
+  { text: "社員の成長を優先したい", type: "サーバント" },
+  { text: "社員に'どうしたいか？'を問う", type: "コーチング" },
+  { text: "現場に入り、一緒に汗をかく", type: "サーバント" },
+  { text: "社員の成功を嬉しく感じる", type: "サーバント" },
+  { text: "組織文化を変えたい", type: "トランスフォーメーショナル" },
+  { text: "部門間の壁をなくしたい", type: "システム" },
+  { text: "変化を恐れず挑戦環境を作る", type: "トランスフォーメーショナル" },
+  { text: "組織制度を見直したい", type: "システム" },
+  { text: "次を創りたい", type: "トランスフォーメーショナル" },
+  { text: "言動に一貫性がある", type: "オーセンティック" },
+  { text: "価値観を明確にできる", type: "オーセンティック" },
+  { text: "家業継ぐ意味を持っている", type: "オーセンティック" },
+  { text: "正直に考えを伝える", type: "オーセンティック" },
+  { text: "自分が納得できるかを重視", type: "オーセンティック" },
+  { text: "ビジョンを伝えている", type: "トランスフォーメーショナル" },
+  { text: "将来像に共感を得ている", type: "トランスフォーメーショナル" },
+  { text: "メッセージに希望がある", type: "トランスフォーメーショナル" },
+  { text: "刺激を与える言動をしている", type: "トランスフォーメーショナル" },
+  { text: "この人についていきたいと思われたい", type: "トランスフォーメーショナル" }
+];
+
+const stories = {
+  "サーバント": {
+    title: "現場起点型リーダー",
+    phases: [
+      "現場に入り、社員と汗をかく",
+      "対話と1on1で関係を築く",
+      "社員と一緒にビジョンを練る"
+    ],
+    initiatives: [
+      "現場同行を週1回継続",
+      "“社長とのランチ会”でカジュアル対話",
+      "社内メンター制度の導入"
+    ]
+  },
+  "コーチング": {
+    title: "育成起点型リーダー",
+    phases: [
+      "信頼される問いかけを習慣に",
+      "次世代幹部を育てる",
+      "挑戦と失敗が許される文化を醸成"
+    ],
+    initiatives: [
+      "コーチング研修を幹部と一緒に受講",
+      "新規プロジェクトに若手を抜擢",
+      "振り返りの場を組織的にデザイン"
+    ]
+  },
+  "オーセンティック": {
+    title: "信念起点型リーダー",
+    phases: [
+      "なぜ継ぐのか？を明文化",
+      "思いや価値観を社内外に共有",
+      "理念に共鳴する仲間と共に進む"
+    ],
+    initiatives: [
+      "「私と家業の物語」note発信",
+      "理念マップ・カルチャーブックの作成",
+      "フィードバック文化の醸成"
+    ]
+  },
+  "トランスフォーメーショナル": {
+    title: "未来起点型リーダー",
+    phases: [
+      "新ビジョンを社内外に明言",
+      "新規事業・新組織を推進",
+      "古いルールを壊し、新基準へ"
+    ],
+    initiatives: [
+      "新ブランド／新規事業チームの発足",
+      "ビジョン動画やイベントの開催",
+      "経営指標・評価制度を刷新"
+    ]
+  },
+  "システム": {
+    title: "構造変革起点型リーダー",
+    phases: [
+      "家族・幹部・社員の声を聴く",
+      "ガバナンス・制度を刷新",
+      "ファミリーと組織の融合ガバナンス"
+    ],
+    initiatives: [
+      "ファミリーガバナンス設計支援",
+      "部署横断の委員会設置",
+      "組織開発チームを設ける"
+    ]
+  }
+};
+
+let current = 0;
+const scores = { サーバント: 0, コーチング: 0, トランスフォーメーショナル: 0, オーセンティック: 0, システム: 0 };
+
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById('quiz').innerHTML = `
+    <div class="question">${q.text}</div>
+    <div class="options">
+      <button onclick="answer('はい')">はい</button>
+      <button onclick="answer('どちらとも')">どちらとも言えない</button>
+      <button onclick="answer('いいえ')">いいえ</button>
+    </div>
+  `;
+  document.getElementById('progress-bar').style.width = `${(current / questions.length) * 100}%`;
+}
+
+function answer(response) {
+  if (response === 'はい') scores[questions[current].type]++;
+  current++;
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('progress').style.display = 'none';
+  const topType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+  const story = stories[topType];
+
+  document.getElementById('result').innerHTML = `
+    <h2>あなたのリーダータイプは：${topType}型！</h2>
+    <img src="${topType}.png" alt="${topType}">
+    <p>あなたには${topType}型リーダーシップが向いています。</p>
+    <div class="story">
+      <h3>ストーリープラン：${story.title}</h3>
+      <h4>ステップ：</h4>
+      <ul>${story.phases.map(phase => `<li>${phase}</li>`).join('')}</ul>
+      <h4>施策例：</h4>
+      <ul>${story.initiatives.map(init => `<li>${init}</li>`).join('')}</ul>
+    </div>
+    <button class="share-btn" onclick="shareResult('${topType}')">結果をシェアする</button>
+  `;
+  document.getElementById('result').style.display = 'block';
+}
+
+function shareResult(type) {
+  const url = encodeURIComponent(location.href);
+  const text = encodeURIComponent(`私は「${type}型リーダー」タイプでした！あなたも診断してみよう！`);
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+}
+
+showQuestion();
+</script>
+</body>
+</html>
